@@ -15,18 +15,56 @@ pnpm db:seed
 pnpm dev
 ```
 
-## Branch naming convention
+## Branch workflow
 
-Always branch off `develop` (never commit directly to `main`):
+```
+main        ← production — protected, never push directly
+  ↑ PR only
+develop     ← validation/staging — protected, never push directly
+  ↑ PR only
+feature/{name}   ← active development — push freely
+fix/{name}
+chore/{name}
+docs/{name}
+```
+
+### Rules
+- **Never** commit directly to `main` or `develop` — the pre-push hook will block it
+- Branch off `develop` for every new piece of work
+- Open a PR to `develop` when the feature is ready → triggers CI
+- `develop` → `main` PRs are release PRs → triggers semantic-release
+
+### Naming convention
 
 | Prefix | Use case |
 |---|---|
-| `feat/short-description` | New features |
-| `fix/short-description` | Bug fixes |
-| `chore/short-description` | Maintenance, deps, tooling |
-| `docs/short-description` | Documentation only |
-| `refactor/short-description` | Code restructuring (no behaviour change) |
-| `ci/short-description` | CI/CD pipeline changes |
+| `feature/{name}` | New features |
+| `fix/{name}` | Bug fixes |
+| `chore/{name}` | Maintenance, deps, tooling |
+| `docs/{name}` | Documentation only |
+| `refactor/{name}` | Code restructuring |
+| `ci/{name}` | CI/CD changes |
+
+### Typical flow
+
+```bash
+# 1. Always start from an up-to-date develop
+git checkout develop
+git pull origin develop
+
+# 2. Create your feature branch
+git checkout -b feature/my-feature
+
+# 3. Work, commit using Conventional Commits
+git commit -m "feat(articles): add full-text search"
+
+# 4. Push your branch (pre-push runs typecheck + unit tests)
+git push origin feature/my-feature
+
+# 5. Open a PR to develop on GitHub
+# 6. After review + CI green → merge to develop
+# 7. When develop is stable → open PR to main → triggers release
+```
 
 ## Commit convention
 

@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     branches:
-      - main
+      - main  # Triggered only when a PR from develop is merged into main
 
 jobs:
   release:
