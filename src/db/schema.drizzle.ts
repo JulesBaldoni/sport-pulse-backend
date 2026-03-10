@@ -3,9 +3,9 @@
  * This file is used ONLY by drizzle-kit generate/migrate.
  * The application uses src/db/schema/index.ts instead.
  */
-import { relations, sql } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm'
 import {
-  AnyPgColumn,
+  type AnyPgColumn,
   customType,
   index,
   integer,
@@ -15,14 +15,14 @@ import {
   text,
   timestamp,
   uuid,
-} from 'drizzle-orm/pg-core';
+} from 'drizzle-orm/pg-core'
 
 // Custom tsvector type (no native Drizzle support)
 const tsvector = customType<{ data: string }>({
   dataType() {
-    return 'tsvector';
+    return 'tsvector'
   },
-});
+})
 
 // ─── Sports ───────────────────────────────────────────────────────────────────
 export const sports = pgTable('sports', {
@@ -30,7 +30,7 @@ export const sports = pgTable('sports', {
   name: text('name').notNull(),
   slug: text('slug').unique().notNull(),
   created_at: timestamp('created_at').defaultNow().notNull(),
-});
+})
 
 // ─── Teams ────────────────────────────────────────────────────────────────────
 export const teams = pgTable('teams', {
@@ -44,7 +44,7 @@ export const teams = pgTable('teams', {
     .references(() => sports.id, { onDelete: 'cascade' }),
   country: text('country'),
   created_at: timestamp('created_at').defaultNow().notNull(),
-});
+})
 
 // ─── Events ───────────────────────────────────────────────────────────────────
 export const eventStatusEnum = pgEnum('event_status', [
@@ -52,7 +52,7 @@ export const eventStatusEnum = pgEnum('event_status', [
   'live',
   'finished',
   'cancelled',
-]);
+])
 
 export const events = pgTable(
   'events',
@@ -81,23 +81,19 @@ export const events = pgTable(
     index('events_status_idx').on(table.status),
     index('events_started_at_idx').on(table.started_at),
   ],
-);
+)
 
 // ─── Articles ─────────────────────────────────────────────────────────────────
-export const articleToneEnum = pgEnum('article_tone', [
-  'neutral',
-  'analytical',
-  'enthusiastic',
-]);
+export const articleToneEnum = pgEnum('article_tone', ['neutral', 'analytical', 'enthusiastic'])
 
-export const articleLanguageEnum = pgEnum('article_language', ['fr', 'en']);
+export const articleLanguageEnum = pgEnum('article_language', ['fr', 'en'])
 
 export const articleStatusEnum = pgEnum('article_status', [
   'pending',
   'generating',
   'published',
   'failed',
-]);
+])
 
 export const articles = pgTable(
   'articles',
@@ -122,20 +118,18 @@ export const articles = pgTable(
     generated_at: timestamp('generated_at'),
     created_at: timestamp('created_at').defaultNow().notNull(),
     deleted_at: timestamp('deleted_at'),
-    search_vector: tsvector('search_vector')
-      .generatedAlwaysAs(
-        sql`to_tsvector('french', coalesce(title, '') || ' ' || coalesce(content, ''))`,
-      ),
+    search_vector: tsvector('search_vector').generatedAlwaysAs(
+      sql`to_tsvector('french', coalesce(title, '') || ' ' || coalesce(content, ''))`,
+    ),
   },
   (table) => [
     index('articles_sport_id_idx').on(table.sport_id),
     index('articles_status_idx').on(table.status),
     index('articles_language_idx').on(table.language),
     index('articles_created_at_idx').on(table.created_at),
-    index('articles_search_vector_gin_idx')
-      .using('gin', sql`${table.search_vector}`),
+    index('articles_search_vector_gin_idx').using('gin', sql`${table.search_vector}`),
   ],
-);
+)
 
 // ─── Users ────────────────────────────────────────────────────────────────────
 export const users = pgTable('users', {
@@ -146,12 +140,10 @@ export const users = pgTable('users', {
     .array()
     .notNull()
     .default(sql`ARRAY[]::text[]`),
-  preferred_language: articleLanguageEnum('preferred_language')
-    .notNull()
-    .default('fr'),
+  preferred_language: articleLanguageEnum('preferred_language').notNull().default('fr'),
   created_at: timestamp('created_at').defaultNow().notNull(),
   updated_at: timestamp('updated_at').defaultNow().notNull(),
-});
+})
 
 // ─── News Topics ──────────────────────────────────────────────────────────────
 
@@ -178,20 +170,20 @@ export const newsTopics = pgTable(
     index('news_topics_first_seen_at_idx').on(table.first_seen_at),
     index('news_topics_article_id_idx').on(table.article_id),
   ],
-);
+)
 
 // ─── Relations ────────────────────────────────────────────────────────────────
 export const sportsRelations = relations(sports, ({ many }) => ({
   teams: many(teams),
   events: many(events),
   articles: many(articles),
-}));
+}))
 
 export const teamsRelations = relations(teams, ({ one, many }) => ({
   sport: one(sports, { fields: [teams.sport_id], references: [sports.id] }),
   homeEvents: many(events, { relationName: 'homeTeam' }),
   awayEvents: many(events, { relationName: 'awayTeam' }),
-}));
+}))
 
 export const eventsRelations = relations(events, ({ one }) => ({
   sport: one(sports, { fields: [events.sport_id], references: [sports.id] }),
@@ -209,13 +201,9 @@ export const eventsRelations = relations(events, ({ one }) => ({
     fields: [events.id],
     references: [articles.event_id],
   }),
-}));
+}))
 
 export const articlesRelations = relations(articles, ({ one }) => ({
   event: one(events, { fields: [articles.event_id], references: [events.id] }),
   sport: one(sports, { fields: [articles.sport_id], references: [sports.id] }),
-}));
-
-
-
-
+}))

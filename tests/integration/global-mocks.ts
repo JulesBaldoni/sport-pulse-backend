@@ -3,7 +3,7 @@
  * Loaded by vitest BEFORE any test file — mocks Redis so no hanging connection.
  * DB connection uses DATABASE_URL (sportpulse_test) injected by vitest.integration.config.ts.
  */
-import { vi } from 'vitest';
+import { vi } from 'vitest'
 
 // Mock IORedis so BullMQ and redis.ts don't create a hanging connection
 vi.mock('ioredis', () => {
@@ -14,9 +14,9 @@ vi.mock('ioredis', () => {
     status: 'ready',
     // BullMQ required options
     options: { maxRetriesPerRequest: null },
-  }));
-  return { default: mockRedis };
-});
+  }))
+  return { default: mockRedis }
+})
 
 // Mock BullMQ Queue and Worker so they don't need a real Redis
 vi.mock('bullmq', () => ({
@@ -33,7 +33,7 @@ vi.mock('bullmq', () => ({
     on: vi.fn(),
     close: vi.fn().mockResolvedValue(undefined),
   })),
-}));
+}))
 
 // Mock node-cron so schedulers don't actually schedule
 vi.mock('node-cron', () => ({
@@ -43,5 +43,4 @@ vi.mock('node-cron', () => ({
       destroy: vi.fn(),
     }),
   },
-}));
-
+}))

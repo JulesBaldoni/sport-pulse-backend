@@ -1,56 +1,50 @@
-import { NotFoundError, ConflictError } from '@/lib/errors.js';
-import { buildPaginatedResponse } from '@/lib/pagination.js';
-import type { PaginatedResponse } from '@/lib/pagination.js';
-import { articlesRepository } from './articles.repository.js';
-import { eventsRepository } from '@/modules/events/events.repository.js';
+import { NotFoundError, ConflictError } from '@/lib/errors.js'
+import { buildPaginatedResponse } from '@/lib/pagination.js'
+import type { PaginatedResponse } from '@/lib/pagination.js'
+import { articlesRepository } from './articles.repository.js'
+import { eventsRepository } from '@/modules/events/events.repository.js'
 import type {
   Article,
   ArticleWithRelations,
   ListArticlesParams,
   SearchArticlesParams,
   GenerateArticleInput,
-} from './articles.types.js';
+} from './articles.types.js'
 
 export const articlesService = {
-  async listArticles(
-    params: ListArticlesParams,
-  ): Promise<PaginatedResponse<Article>> {
-    const items = await articlesRepository.findMany(params);
-    return buildPaginatedResponse(items, params.limit);
+  async listArticles(params: ListArticlesParams): Promise<PaginatedResponse<Article>> {
+    const items = await articlesRepository.findMany(params)
+    return buildPaginatedResponse(items, params.limit)
   },
 
-  async searchArticles(
-    params: SearchArticlesParams,
-  ): Promise<PaginatedResponse<Article>> {
-    const items = await articlesRepository.search(params);
-    return buildPaginatedResponse(items, params.limit);
+  async searchArticles(params: SearchArticlesParams): Promise<PaginatedResponse<Article>> {
+    const items = await articlesRepository.search(params)
+    return buildPaginatedResponse(items, params.limit)
   },
 
   async getArticleById(id: string): Promise<ArticleWithRelations> {
-    const article = await articlesRepository.findById(id);
+    const article = await articlesRepository.findById(id)
     if (!article) {
-      throw new NotFoundError(`Article ${id} not found`);
+      throw new NotFoundError(`Article ${id} not found`)
     }
-    return article;
+    return article
   },
 
   async deleteArticle(id: string): Promise<void> {
-    await articlesRepository.softDelete(id);
+    await articlesRepository.softDelete(id)
   },
 
   async triggerGeneration(input: GenerateArticleInput): Promise<Article> {
     // Check event exists
-    const event = await eventsRepository.findById(input.event_id);
+    const event = await eventsRepository.findById(input.event_id)
     if (!event) {
-      throw new NotFoundError(`Event ${input.event_id} not found`);
+      throw new NotFoundError(`Event ${input.event_id} not found`)
     }
 
     // Check no article already exists for this event
-    const existing = await articlesRepository.findByEventId(input.event_id);
+    const existing = await articlesRepository.findByEventId(input.event_id)
     if (existing) {
-      throw new ConflictError(
-        `An article already exists for event ${input.event_id}`,
-      );
+      throw new ConflictError(`An article already exists for event ${input.event_id}`)
     }
 
     // Create article with status 'pending'
@@ -65,8 +59,8 @@ export const articlesService = {
       language: input.language,
       status: 'pending',
       sources: [],
-    });
+    })
 
-    return article;
+    return article
   },
-};
+}

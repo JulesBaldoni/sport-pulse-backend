@@ -2,22 +2,99 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches:
+      - main
+      - develop
   pull_request:
-    branches: [main, develop]
+    branches:
+      - main
+      - develop
 
 jobs:
-  ci:
-    name: Typecheck & Tests
+  # ─────────────────────────────────────────────
+  # Job 1: Code Quality (typecheck + lint + format)
+  # ─────────────────────────────────────────────
+  quality:
+    name: Code Quality
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: TypeScript type check
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Format check
+        run: pnpm format:check
+
+  # ─────────────────────────────────────────────
+  # Job 2: Unit Tests
+  # ─────────────────────────────────────────────
+  test-unit:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run unit tests
+        run: pnpm test:unit
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage/lcov.info
+          retention-days: 7
+
+  # ─────────────────────────────────────────────
+  # Job 3: Integration Tests
+  # ─────────────────────────────────────────────
+  test-integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: quality
 
     services:
       postgres:
         image: postgres:16-alpine
         env:
+          POSTGRES_DB: sportpulse_test
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: sportpulse_test
         ports:
           - 5432:5432
         options: >-
@@ -38,17 +115,19 @@ jobs:
 
     env:
       NODE_ENV: test
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/sportpulse_test
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/sportpulse_test
       REDIS_URL: redis://localhost:6379
-      MISTRAL_API_KEY: dummy
-      SPORTS_API_KEY: dummy
+      # Fake values — integrations are mocked in tests
+      MISTRAL_API_KEY: test_key
+      SPORTS_API_KEY: test_key
+      GUARDIAN_API_KEY: test_key
       SPORTS_API_BASE_URL: https://v3.football.api-sports.io
-      GUARDIAN_API_KEY: dummy
-      LOG_LEVEL: silent
       PORT: 3000
+      LOG_LEVEL: error
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup pnpm
@@ -59,21 +138,53 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: pnpm
+          node-version: '20'
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Typecheck
-        run: pnpm typecheck
-
-      - name: Run unit tests
-        run: pnpm test:unit
-
-      - name: Run migrations
+      - name: Run database migrations
         run: pnpm db:migrate
+
+      - name: Seed database
+        run: pnpm db:seed
 
       - name: Run integration tests
         run: pnpm test:integration
 
+  # ─────────────────────────────────────────────
+  # Job 4: Build Check
+  # ─────────────────────────────────────────────
+  build:
+    name: Build Check
+    runs-on: ubuntu-latest
+    needs: [test-unit, test-integration]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Confirm dist/app.js exists
+        run: |
+          if [ ! -f dist/app.js ]; then
+            echo "❌ dist/app.js not found — build failed"
+            exit 1
+          fi
+          echo "✅ dist/app.js found — build successful"

@@ -1,5 +1,5 @@
-import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
-import { sports } from './sports.js';
+import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import { sports } from './sports.js'
 
 export const teams = pgTable('teams', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -12,8 +12,7 @@ export const teams = pgTable('teams', {
     .references(() => sports.id, { onDelete: 'cascade' }),
   country: text('country'),
   created_at: timestamp('created_at').defaultNow().notNull(),
-});
+})
 
-export type Team = typeof teams.$inferSelect;
-export type NewTeam = typeof teams.$inferInsert;
-
+export type Team = typeof teams.$inferSelect
+export type NewTeam = typeof teams.$inferInsert

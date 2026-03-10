@@ -1,6 +1,6 @@
-import type { Event, EventWithRelations } from '@/modules/events/events.types.js';
+import type { Event, EventWithRelations } from '@/modules/events/events.types.js'
 
-const BASE_UUID = '00000000-0000-0000-0000-000000000001';
+const BASE_UUID = '00000000-0000-0000-0000-000000000001'
 
 export function makeEvent(overrides: Partial<Event> = {}): Event {
   return {
@@ -17,13 +17,13 @@ export function makeEvent(overrides: Partial<Event> = {}): Event {
     started_at: new Date('2026-03-01T20:00:00Z'),
     created_at: new Date('2026-03-01T18:00:00Z'),
     ...overrides,
-  };
+  }
 }
 
 export function makeEventWithRelations(
   overrides: Partial<EventWithRelations> = {},
 ): EventWithRelations {
-  const base = makeEvent(overrides);
+  const base = makeEvent(overrides)
   return {
     ...base,
     sport: {
@@ -54,6 +54,5 @@ export function makeEventWithRelations(
     },
     article: null,
     ...overrides,
-  };
+  }
 }
-

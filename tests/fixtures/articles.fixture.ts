@@ -1,18 +1,18 @@
-import type { Article, ArticleWithRelations } from '@/modules/articles/articles.types.js';
-import { makeEventWithRelations } from './events.fixture.js';
+import type { Article, ArticleWithRelations } from '@/modules/articles/articles.types.js'
+import { makeEventWithRelations } from './events.fixture.js'
 
-const SPORT_ID = '00000000-0000-0000-0000-000000000010';
-const EVENT_ID = '00000000-0000-0000-0000-000000000001';
-const ARTICLE_ID = '00000000-0000-0000-0000-000000000100';
+const SPORT_ID = '00000000-0000-0000-0000-000000000010'
+const EVENT_ID = '00000000-0000-0000-0000-000000000001'
+const ARTICLE_ID = '00000000-0000-0000-0000-000000000100'
 
 export function makeArticle(overrides: Partial<Article> = {}): Article {
   return {
     id: ARTICLE_ID,
     event_id: EVENT_ID,
     sport_id: SPORT_ID,
-    title: 'PSG domine le classique face à l\'OM',
+    title: "PSG domine le classique face à l'OM",
     summary: 'Un match intense remporté par le PSG.',
-    content: 'Le Paris Saint-Germain a dominé l\'Olympique de Marseille...',
+    content: "Le Paris Saint-Germain a dominé l'Olympique de Marseille...",
     tone: 'neutral',
     language: 'fr',
     status: 'published',
@@ -22,13 +22,13 @@ export function makeArticle(overrides: Partial<Article> = {}): Article {
     deleted_at: null,
     search_vector: null,
     ...overrides,
-  };
+  }
 }
 
 export function makeArticleWithRelations(
   overrides: Partial<ArticleWithRelations> = {},
 ): ArticleWithRelations {
-  const base = makeArticle(overrides);
+  const base = makeArticle(overrides)
   return {
     ...base,
     sport: {
@@ -39,6 +39,5 @@ export function makeArticleWithRelations(
     },
     event: makeEventWithRelations({ id: EVENT_ID }),
     ...overrides,
-  };
+  }
 }
-

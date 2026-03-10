@@ -1,5 +1,5 @@
 import {
-  AnyPgColumn,
+  type AnyPgColumn,
   customType,
   index,
   pgEnum,
@@ -7,31 +7,27 @@ import {
   text,
   timestamp,
   uuid,
-} from 'drizzle-orm/pg-core';
-import { sql } from 'drizzle-orm';
+} from 'drizzle-orm/pg-core'
+import { sql } from 'drizzle-orm'
 
 const tsvector = customType<{ data: string }>({
   dataType() {
-    return 'tsvector';
+    return 'tsvector'
   },
-});
-import { sports } from './sports.js';
-import { events } from './events.js';
+})
+import { sports } from './sports.js'
+import { events } from './events.js'
 
-export const articleToneEnum = pgEnum('article_tone', [
-  'neutral',
-  'analytical',
-  'enthusiastic',
-]);
+export const articleToneEnum = pgEnum('article_tone', ['neutral', 'analytical', 'enthusiastic'])
 
-export const articleLanguageEnum = pgEnum('article_language', ['fr', 'en']);
+export const articleLanguageEnum = pgEnum('article_language', ['fr', 'en'])
 
 export const articleStatusEnum = pgEnum('article_status', [
   'pending',
   'generating',
   'published',
   'failed',
-]);
+])
 
 export const articles = pgTable(
   'articles',
@@ -56,25 +52,18 @@ export const articles = pgTable(
     generated_at: timestamp('generated_at'),
     created_at: timestamp('created_at').defaultNow().notNull(),
     deleted_at: timestamp('deleted_at'),
-    search_vector: tsvector('search_vector')
-      .generatedAlwaysAs(
-        sql`to_tsvector('french', coalesce(title, '') || ' ' || coalesce(content, ''))`,
-      ),
+    search_vector: tsvector('search_vector').generatedAlwaysAs(
+      sql`to_tsvector('french', coalesce(title, '') || ' ' || coalesce(content, ''))`,
+    ),
   },
   (table) => [
     index('articles_sport_id_idx').on(table.sport_id),
     index('articles_status_idx').on(table.status),
     index('articles_language_idx').on(table.language),
     index('articles_created_at_idx').on(table.created_at),
-    index('articles_search_vector_gin_idx')
-      .using('gin', sql`${table.search_vector}`),
+    index('articles_search_vector_gin_idx').using('gin', sql`${table.search_vector}`),
   ],
-);
+)
 
-export type Article = typeof articles.$inferSelect;
-export type NewArticle = typeof articles.$inferInsert;
-
-
-
-
-
+export type Article = typeof articles.$inferSelect
+export type NewArticle = typeof articles.$inferInsert

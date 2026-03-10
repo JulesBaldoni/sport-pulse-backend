@@ -1,0 +1,11 @@
+# CODEOWNERS — defines code review requirements
+# Documentation: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# All files — require review from repo owner
+* @JulesBaldoni
+
+# CI/CD and infrastructure changes require extra attention
+.github/ @JulesBaldoni
+docker-compose.yml @JulesBaldoni
+
+

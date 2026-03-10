@@ -1,7 +1,7 @@
-import { env } from '@/config/env.js';
-import pino from 'pino';
+import { env } from '@/config/env.js'
+import pino from 'pino'
 
-const isDev = env.NODE_ENV === 'development';
+const isDev = env.NODE_ENV === 'development'
 
 const logger = pino({
   level: env.LOG_LEVEL,
@@ -17,11 +17,10 @@ const logger = pino({
         },
       }
     : {}),
-});
+})
 
-export default logger;
+export default logger
 
 export function createChildLogger(module: string): pino.Logger {
-  return logger.child({ module });
+  return logger.child({ module })
 }
-

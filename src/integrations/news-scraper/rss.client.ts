@@ -1,24 +1,24 @@
-import Parser from 'rss-parser';
-import { createChildLogger } from '@/lib/logger.js';
+import Parser from 'rss-parser'
+import { createChildLogger } from '@/lib/logger.js'
 
-const log = createChildLogger('rss-client');
+const log = createChildLogger('rss-client')
 
 export type RssArticle = {
-  title: string;
-  content: string;
-  url: string;
-  source: string;
-  publishedAt: Date;
-};
+  title: string
+  content: string
+  url: string
+  source: string
+  publishedAt: Date
+}
 
 export const RSS_FEEDS = [
   { name: 'BBC Sport', url: 'https://feeds.bbci.co.uk/sport/rss.xml' },
   { name: 'RMC Sport', url: 'https://rmcsport.bfmtv.com/rss/football.xml' },
   { name: "L'Equipe", url: 'https://www.lequipe.fr/rss/actu_rss.xml' },
   { name: 'Eurosport', url: 'https://www.eurosport.fr/rss.xml' },
-] as const;
+] as const
 
-type Feed = { name: string; url: string };
+type Feed = { name: string; url: string }
 
 const SPORT_FEEDS: Record<string, Feed[]> = {
   football: [
@@ -39,50 +39,50 @@ const SPORT_FEEDS: Record<string, Feed[]> = {
     { name: 'BBC Sport Rugby Union', url: 'https://feeds.bbci.co.uk/sport/rugby-union/rss.xml' },
     { name: "L'Equipe Rugby", url: 'https://www.lequipe.fr/Rugby/rss.xml' },
   ],
-};
+}
 
-const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-const FOUR_HOURS_MS = 4 * 60 * 60 * 1000;
-const MAX_CONTENT_LENGTH = 500;
-const MAX_ARTICLES = 10;
-const MAX_LATEST_ARTICLES = 30;
+const ONE_DAY_MS = 24 * 60 * 60 * 1000
+const FOUR_HOURS_MS = 4 * 60 * 60 * 1000
+const MAX_CONTENT_LENGTH = 500
+const MAX_ARTICLES = 10
+const MAX_LATEST_ARTICLES = 30
 
 class RssClient {
-  private readonly parser: Parser;
+  private readonly parser: Parser
 
   constructor() {
-    this.parser = new Parser({ timeout: 10000 });
+    this.parser = new Parser({ timeout: 10000 })
   }
 
   private async fetchFeeds(feeds: Feed[], cutoffMs: number): Promise<RssArticle[]> {
     const results = await Promise.allSettled(
       feeds.map(async (feed) => {
-        const parsed = await this.parser.parseURL(feed.url);
-        return { feed, items: parsed.items };
+        const parsed = await this.parser.parseURL(feed.url)
+        return { feed, items: parsed.items }
       }),
-    );
+    )
 
-    const articles: RssArticle[] = [];
+    const articles: RssArticle[] = []
 
     for (const result of results) {
       if (result.status === 'rejected') {
         log.warn(
           { error: result.reason instanceof Error ? result.reason.message : String(result.reason) },
           'RSS feed fetch failed',
-        );
-        continue;
+        )
+        continue
       }
 
-      const { feed, items } = result.value;
+      const { feed, items } = result.value
 
       for (const item of items) {
-        const title = item.title ?? '';
-        const rawContent = item.contentSnippet ?? item.content ?? item.summary ?? '';
-        const url = item.link ?? '';
-        const pubDate = item.pubDate ? new Date(item.pubDate) : null;
+        const title = item.title ?? ''
+        const rawContent = item.contentSnippet ?? item.content ?? item.summary ?? ''
+        const url = item.link ?? ''
+        const pubDate = item.pubDate ? new Date(item.pubDate) : null
 
-        if (!pubDate || pubDate.getTime() < cutoffMs) continue;
-        if (!url) continue;
+        if (!pubDate || pubDate.getTime() < cutoffMs) continue
+        if (!url) continue
 
         articles.push({
           title,
@@ -90,35 +90,37 @@ class RssClient {
           url,
           source: feed.name,
           publishedAt: pubDate,
-        });
+        })
       }
     }
 
-    articles.sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
-    return articles;
+    articles.sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime())
+    return articles
   }
 
   async fetchRecentArticles(query: string): Promise<RssArticle[]> {
-    const queryWords = query.toLowerCase().split(/\s+/).filter((w) => w.length > 0);
-    const cutoff = Date.now() - ONE_DAY_MS;
+    const queryWords = query
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((w) => w.length > 0)
+    const cutoff = Date.now() - ONE_DAY_MS
 
-    const all = await this.fetchFeeds([...RSS_FEEDS], cutoff);
+    const all = await this.fetchFeeds([...RSS_FEEDS], cutoff)
 
     const filtered = all.filter((a) => {
-      const titleLower = a.title.toLowerCase();
-      return queryWords.some((word) => titleLower.includes(word));
-    });
+      const titleLower = a.title.toLowerCase()
+      return queryWords.some((word) => titleLower.includes(word))
+    })
 
-    return filtered.slice(0, MAX_ARTICLES);
+    return filtered.slice(0, MAX_ARTICLES)
   }
 
   async fetchLatestBySport(sportSlug: string): Promise<RssArticle[]> {
-    const feeds = SPORT_FEEDS[sportSlug] ?? [...RSS_FEEDS];
-    const cutoff = Date.now() - FOUR_HOURS_MS;
-    const articles = await this.fetchFeeds(feeds, cutoff);
-    return articles.slice(0, MAX_LATEST_ARTICLES);
+    const feeds = SPORT_FEEDS[sportSlug] ?? [...RSS_FEEDS]
+    const cutoff = Date.now() - FOUR_HOURS_MS
+    const articles = await this.fetchFeeds(feeds, cutoff)
+    return articles.slice(0, MAX_LATEST_ARTICLES)
   }
 }
 
-export const rssClient = new RssClient();
-
+export const rssClient = new RssClient()

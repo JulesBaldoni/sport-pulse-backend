@@ -1,13 +1,13 @@
-import { index, integer, pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
-import { sports } from './sports.js';
-import { teams } from './teams.js';
+import { index, integer, pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import { sports } from './sports.js'
+import { teams } from './teams.js'
 
 export const eventStatusEnum = pgEnum('event_status', [
   'scheduled',
   'live',
   'finished',
   'cancelled',
-]);
+])
 
 export const events = pgTable(
   'events',
@@ -36,8 +36,7 @@ export const events = pgTable(
     index('events_status_idx').on(table.status),
     index('events_started_at_idx').on(table.started_at),
   ],
-);
+)
 
-export type Event = typeof events.$inferSelect;
-export type NewEvent = typeof events.$inferInsert;
-
+export type Event = typeof events.$inferSelect
+export type NewEvent = typeof events.$inferInsert

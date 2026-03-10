@@ -1,5 +1,4 @@
 export type Variables = {
-  userId: string;
-  requestId: string;
-};
-
+  userId: string
+  requestId: string
+}

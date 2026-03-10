@@ -1,0 +1,5 @@
+#!/bin/sh
+echo "Running pre-push checks..."
+pnpm typecheck && pnpm test:unit
+echo "Pre-push checks passed."
+

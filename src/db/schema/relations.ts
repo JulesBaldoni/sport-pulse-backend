@@ -1,14 +1,14 @@
-import { relations } from 'drizzle-orm';
-import { sports } from './sports.js';
-import { teams } from './teams.js';
-import { events } from './events.js';
-import { articles } from './articles.js';
+import { relations } from 'drizzle-orm'
+import { sports } from './sports.js'
+import { teams } from './teams.js'
+import { events } from './events.js'
+import { articles } from './articles.js'
 
 export const sportsRelations = relations(sports, ({ many }) => ({
   teams: many(teams),
   events: many(events),
   articles: many(articles),
-}));
+}))
 
 export const teamsRelations = relations(teams, ({ one, many }) => ({
   sport: one(sports, {
@@ -17,7 +17,7 @@ export const teamsRelations = relations(teams, ({ one, many }) => ({
   }),
   homeEvents: many(events, { relationName: 'homeTeam' }),
   awayEvents: many(events, { relationName: 'awayTeam' }),
-}));
+}))
 
 export const eventsRelations = relations(events, ({ one }) => ({
   sport: one(sports, {
@@ -38,7 +38,7 @@ export const eventsRelations = relations(events, ({ one }) => ({
     fields: [events.id],
     references: [articles.event_id],
   }),
-}));
+}))
 
 export const articlesRelations = relations(articles, ({ one }) => ({
   event: one(events, {
@@ -49,5 +49,4 @@ export const articlesRelations = relations(articles, ({ one }) => ({
     fields: [articles.sport_id],
     references: [sports.id],
   }),
-}));
-
+}))

@@ -1,7 +1,6 @@
-import { eq } from 'drizzle-orm';
-import { db } from '@/config/database.js';
-import { teams } from '@/db/schema/index.js';
-import type { Team, NewTeam } from './teams.types.js';
+import { db } from '@/config/database.js'
+import { teams } from '@/db/schema/index.js'
+import type { Team, NewTeam } from './teams.types.js'
 
 export const teamsRepository = {
   async upsertByExternalId(data: NewTeam & { sport_id: string }): Promise<Team> {
@@ -16,8 +15,7 @@ export const teamsRepository = {
           logo_url: data.logo_url,
         },
       })
-      .returning();
-    return result[0]!;
+      .returning()
+    return result[0]!
   },
-};
-
+}

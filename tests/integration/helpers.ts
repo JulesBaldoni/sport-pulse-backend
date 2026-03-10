@@ -1,24 +1,27 @@
-import { testDb } from './setup.js';
-import { sports, teams, events, articles, newsTopics, users } from '../../src/db/schema/index.js';
+import { testDb } from './setup.js'
+import { sports, teams, events, articles, newsTopics, users } from '../../src/db/schema/index.js'
 import type {
-  NewSport, Sport,
-  NewTeam, Team,
-  NewEvent, Event,
-  NewArticle, Article,
-  NewNewsTopic, NewsTopic,
-  NewUser, User,
-} from '../../src/db/schema/index.js';
-import { app } from '../../src/app.js';
+  NewSport,
+  Sport,
+  NewTeam,
+  Team,
+  NewEvent,
+  Event,
+  NewArticle,
+  Article,
+  NewNewsTopic,
+  NewsTopic,
+  NewUser,
+  User,
+} from '../../src/db/schema/index.js'
+import { app } from '../../src/app.js'
 
 // ─── HTTP helpers (use Hono's built-in test client) ───────────────────────────
 
-const BASE = 'http://localhost';
+const BASE = 'http://localhost'
 
-export async function GET(
-  path: string,
-  headers: Record<string, string> = {},
-): Promise<Response> {
-  return app.request(`${BASE}${path}`, { method: 'GET', headers });
+export async function GET(path: string, headers: Record<string, string> = {}): Promise<Response> {
+  return app.request(`${BASE}${path}`, { method: 'GET', headers })
 }
 
 export async function POST(
@@ -30,7 +33,7 @@ export async function POST(
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...headers },
     body: body !== undefined ? JSON.stringify(body) : undefined,
-  });
+  })
 }
 
 export async function PATCH(
@@ -42,57 +45,59 @@ export async function PATCH(
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', ...headers },
     body: body !== undefined ? JSON.stringify(body) : undefined,
-  });
+  })
 }
 
 export async function DELETE(
   path: string,
   headers: Record<string, string> = {},
 ): Promise<Response> {
-  return app.request(`${BASE}${path}`, { method: 'DELETE', headers });
+  return app.request(`${BASE}${path}`, { method: 'DELETE', headers })
 }
 
 // ─── Auth headers ─────────────────────────────────────────────────────────────
 
-const DEFAULT_USER_ID = '10000000-0000-0000-0000-000000000001';
+const DEFAULT_USER_ID = '10000000-0000-0000-0000-000000000001'
 
-export async function authHeaders(userId: string = DEFAULT_USER_ID): Promise<Record<string, string>> {
-  return { 'x-user-id': userId };
+export async function authHeaders(
+  userId: string = DEFAULT_USER_ID,
+): Promise<Record<string, string>> {
+  return { 'x-user-id': userId }
 }
 
 // ─── Seed helpers ─────────────────────────────────────────────────────────────
 
-let _teamCounter = 0;
-let _eventCounter = 0;
-let _articleCounter = 0;
-let _userCounter = 0;
-let _topicCounter = 0;
+let _teamCounter = 0
+let _eventCounter = 0
+let _articleCounter = 0
+let _userCounter = 0
+let _topicCounter = 0
 
 function uid(): string {
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 }
 
 export const seed = {
   async sport(overrides: Partial<NewSport> = {}): Promise<Sport> {
-    const slug = overrides.slug ?? `sport-${uid()}`;
+    const slug = overrides.slug ?? `sport-${uid()}`
     const [row] = await testDb
       .insert(sports)
       .values({ name: slug.charAt(0).toUpperCase() + slug.slice(1), slug, ...overrides })
       .onConflictDoNothing()
-      .returning();
+      .returning()
 
     if (!row) {
       // Already exists (conflict on slug) — fetch it
       const existing = await testDb.query.sports.findFirst({
         where: (s, { eq }) => eq(s.slug, slug),
-      });
-      return existing!;
+      })
+      return existing!
     }
-    return row;
+    return row
   },
 
   async team(overrides: Partial<NewTeam> = {}): Promise<Team> {
-    _teamCounter++;
+    _teamCounter++
     const [row] = await testDb
       .insert(teams)
       .values({
@@ -101,12 +106,12 @@ export const seed = {
         sport_id: overrides.sport_id ?? '00000000-0000-0000-0000-000000000000',
         ...overrides,
       })
-      .returning();
-    return row!;
+      .returning()
+    return row!
   },
 
   async event(overrides: Partial<NewEvent> = {}): Promise<Event> {
-    _eventCounter++;
+    _eventCounter++
     const [row] = await testDb
       .insert(events)
       .values({
@@ -119,12 +124,12 @@ export const seed = {
         competition: 'Test League',
         ...overrides,
       })
-      .returning();
-    return row!;
+      .returning()
+    return row!
   },
 
   async article(overrides: Partial<NewArticle> = {}): Promise<Article> {
-    _articleCounter++;
+    _articleCounter++
     const [row] = await testDb
       .insert(articles)
       .values({
@@ -137,12 +142,12 @@ export const seed = {
         sources: [],
         ...overrides,
       })
-      .returning();
-    return row!;
+      .returning()
+    return row!
   },
 
   async newsTopic(overrides: Partial<NewNewsTopic> = {}): Promise<NewsTopic> {
-    _topicCounter++;
+    _topicCounter++
     const [row] = await testDb
       .insert(newsTopics)
       .values({
@@ -155,12 +160,12 @@ export const seed = {
         raw_excerpts: [],
         ...overrides,
       })
-      .returning();
-    return row!;
+      .returning()
+    return row!
   },
 
   async user(overrides: Partial<NewUser> = {}): Promise<User> {
-    _userCounter++;
+    _userCounter++
     const [row] = await testDb
       .insert(users)
       .values({
@@ -169,8 +174,7 @@ export const seed = {
         preferred_language: 'fr',
         ...overrides,
       })
-      .returning();
-    return row!;
+      .returning()
+    return row!
   },
-};
-
+}

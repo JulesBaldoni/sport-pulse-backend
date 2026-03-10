@@ -15,7 +15,7 @@ const ErrorResponseSchema = {
     },
   },
   required: ['success', 'error'],
-};
+}
 
 const PaginationMetaSchema = {
   type: 'object',
@@ -25,7 +25,7 @@ const PaginationMetaSchema = {
     count: { type: 'integer', example: 20 },
   },
   required: ['nextCursor', 'hasMore', 'count'],
-};
+}
 
 const SportSchema = {
   type: 'object',
@@ -36,7 +36,7 @@ const SportSchema = {
     created_at: { type: 'string', format: 'date-time' },
   },
   required: ['id', 'name', 'slug', 'created_at'],
-};
+}
 
 const TeamSchema = {
   type: 'object',
@@ -45,18 +45,22 @@ const TeamSchema = {
     external_id: { type: 'string', example: '85' },
     name: { type: 'string', example: 'Paris Saint-Germain' },
     short_name: { type: 'string', nullable: true, example: 'PSG' },
-    logo_url: { type: 'string', nullable: true, example: 'https://media.api-sports.io/football/teams/85.png' },
+    logo_url: {
+      type: 'string',
+      nullable: true,
+      example: 'https://media.api-sports.io/football/teams/85.png',
+    },
     sport_id: { type: 'string', format: 'uuid' },
     country: { type: 'string', nullable: true, example: 'France' },
     created_at: { type: 'string', format: 'date-time' },
   },
   required: ['id', 'external_id', 'name', 'sport_id', 'created_at'],
-};
+}
 
 const EventStatusSchema = {
   type: 'string',
   enum: ['scheduled', 'live', 'finished', 'cancelled'],
-};
+}
 
 const EventSchema = {
   type: 'object',
@@ -74,23 +78,32 @@ const EventSchema = {
     started_at: { type: 'string', format: 'date-time' },
     created_at: { type: 'string', format: 'date-time' },
   },
-  required: ['id', 'external_id', 'sport_id', 'home_team_id', 'away_team_id', 'status', 'started_at', 'created_at'],
-};
+  required: [
+    'id',
+    'external_id',
+    'sport_id',
+    'home_team_id',
+    'away_team_id',
+    'status',
+    'started_at',
+    'created_at',
+  ],
+}
 
 const ArticleStatusSchema = {
   type: 'string',
   enum: ['pending', 'generating', 'published', 'failed'],
-};
+}
 
 const ArticleToneSchema = {
   type: 'string',
   enum: ['neutral', 'analytical', 'enthusiastic'],
-};
+}
 
 const ArticleLanguageSchema = {
   type: 'string',
   enum: ['fr', 'en'],
-};
+}
 
 const ArticleSchema = {
   type: 'object',
@@ -98,8 +111,12 @@ const ArticleSchema = {
     id: { type: 'string', format: 'uuid' },
     event_id: { type: 'string', format: 'uuid', nullable: true },
     sport_id: { type: 'string', format: 'uuid' },
-    title: { type: 'string', example: 'PSG domine l\'OM dans un classique intense' },
-    summary: { type: 'string', nullable: true, example: 'Le Paris Saint-Germain a remporté le classique face à l\'Olympique de Marseille.' },
+    title: { type: 'string', example: "PSG domine l'OM dans un classique intense" },
+    summary: {
+      type: 'string',
+      nullable: true,
+      example: "Le Paris Saint-Germain a remporté le classique face à l'Olympique de Marseille.",
+    },
     content: { type: 'string', example: 'Article complet...' },
     tone: ArticleToneSchema,
     language: ArticleLanguageSchema,
@@ -109,8 +126,18 @@ const ArticleSchema = {
     created_at: { type: 'string', format: 'date-time' },
     deleted_at: { type: 'string', format: 'date-time', nullable: true },
   },
-  required: ['id', 'sport_id', 'title', 'content', 'tone', 'language', 'status', 'sources', 'created_at'],
-};
+  required: [
+    'id',
+    'sport_id',
+    'title',
+    'content',
+    'tone',
+    'language',
+    'status',
+    'sources',
+    'created_at',
+  ],
+}
 
 const UserSchema = {
   type: 'object',
@@ -118,13 +145,17 @@ const UserSchema = {
     id: { type: 'string', format: 'uuid' },
     email: { type: 'string', format: 'email', example: 'user@example.com' },
     display_name: { type: 'string', nullable: true, example: 'Jules' },
-    preferred_sports: { type: 'array', items: { type: 'string' }, example: ['football', 'basketball'] },
+    preferred_sports: {
+      type: 'array',
+      items: { type: 'string' },
+      example: ['football', 'basketball'],
+    },
     preferred_language: ArticleLanguageSchema,
     created_at: { type: 'string', format: 'date-time' },
     updated_at: { type: 'string', format: 'date-time' },
   },
   required: ['id', 'email', 'preferred_sports', 'preferred_language', 'created_at', 'updated_at'],
-};
+}
 
 // ─── Common query params ──────────────────────────────────────────────────────
 
@@ -133,38 +164,38 @@ const cursorParam = {
   in: 'query',
   description: 'Base64url-encoded cursor for pagination (from previous response meta.nextCursor)',
   schema: { type: 'string' },
-};
+}
 
 const limitParam = {
   name: 'limit',
   in: 'query',
   description: 'Number of results per page (1–100, default 20)',
   schema: { type: 'integer', minimum: 1, maximum: 100, default: 20 },
-};
+}
 
 const sportIdParam = {
   name: 'sport_id',
   in: 'query',
   description: 'Filter by sport UUID',
   schema: { type: 'string', format: 'uuid' },
-};
+}
 
 // ─── Common responses ─────────────────────────────────────────────────────────
 
 const unauthorizedResponse = {
   description: 'Missing or invalid x-user-id header',
   content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } },
-};
+}
 
 const notFoundResponse = {
   description: 'Resource not found',
   content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } },
-};
+}
 
 const validationErrorResponse = {
   description: 'Invalid request parameters or body',
   content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } },
-};
+}
 
 // ─── Spec ─────────────────────────────────────────────────────────────────────
 
@@ -173,7 +204,8 @@ export const openApiSpec = {
   info: {
     title: 'SportPulse API',
     version: '1.0.0',
-    description: 'REST API for SportPulse — AI-generated sports news articles based on real match data and sourced press content.',
+    description:
+      'REST API for SportPulse — AI-generated sports news articles based on real match data and sourced press content.',
     contact: { name: 'SportPulse' },
   },
   servers: [
@@ -267,7 +299,8 @@ export const openApiSpec = {
       get: {
         tags: ['Events'],
         summary: 'List events',
-        description: 'Returns a paginated list of sports events, optionally filtered by sport and status.',
+        description:
+          'Returns a paginated list of sports events, optionally filtered by sport and status.',
         operationId: 'listEvents',
         parameters: [
           sportIdParam,
@@ -346,7 +379,8 @@ export const openApiSpec = {
       post: {
         tags: ['Events'],
         summary: 'Trigger events sync',
-        description: 'Manually triggers the events sync pipeline: fetches recent finished fixtures from the Sports API, upserts teams and events in the database.',
+        description:
+          'Manually triggers the events sync pipeline: fetches recent finished fixtures from the Sports API, upserts teams and events in the database.',
         operationId: 'syncEvents',
         security: [{ UserIdHeader: [] }],
         responses: {
@@ -361,7 +395,11 @@ export const openApiSpec = {
                     data: {
                       type: 'object',
                       properties: {
-                        synced: { type: 'integer', example: 5, description: 'Number of events upserted' },
+                        synced: {
+                          type: 'integer',
+                          example: 5,
+                          description: 'Number of events upserted',
+                        },
                       },
                       required: ['synced'],
                     },
@@ -373,7 +411,9 @@ export const openApiSpec = {
           '401': unauthorizedResponse,
           '502': {
             description: 'Sports API unreachable or returned an error',
-            content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } },
+            content: {
+              'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } },
+            },
           },
         },
       },
@@ -383,7 +423,8 @@ export const openApiSpec = {
       get: {
         tags: ['Articles'],
         summary: 'List published articles',
-        description: 'Returns a paginated list of published, non-deleted articles. Ordered by creation date descending.',
+        description:
+          'Returns a paginated list of published, non-deleted articles. Ordered by creation date descending.',
         operationId: 'listArticles',
         parameters: [
           sportIdParam,
@@ -426,7 +467,8 @@ export const openApiSpec = {
       get: {
         tags: ['Articles'],
         summary: 'Full-text search articles',
-        description: 'Searches published articles using PostgreSQL full-text search on title and content.',
+        description:
+          'Searches published articles using PostgreSQL full-text search on title and content.',
         operationId: 'searchArticles',
         parameters: [
           {
@@ -509,7 +551,8 @@ export const openApiSpec = {
       delete: {
         tags: ['Articles'],
         summary: 'Soft-delete an article',
-        description: 'Marks an article as deleted (sets deleted_at). The article is no longer returned in list or search results.',
+        description:
+          'Marks an article as deleted (sets deleted_at). The article is no longer returned in list or search results.',
         operationId: 'deleteArticle',
         security: [{ UserIdHeader: [] }],
         parameters: [
@@ -549,7 +592,8 @@ export const openApiSpec = {
       post: {
         tags: ['Articles'],
         summary: 'Trigger AI article generation',
-        description: 'Creates a pending article record and enqueues an async generation job. The article will be generated by the worker using Mistral AI and press excerpts.',
+        description:
+          'Creates a pending article record and enqueues an async generation job. The article will be generated by the worker using Mistral AI and press excerpts.',
         operationId: 'generateArticle',
         security: [{ UserIdHeader: [] }],
         requestBody: {
@@ -559,7 +603,11 @@ export const openApiSpec = {
               schema: {
                 type: 'object',
                 properties: {
-                  event_id: { type: 'string', format: 'uuid', description: 'UUID of the event to generate an article for' },
+                  event_id: {
+                    type: 'string',
+                    format: 'uuid',
+                    description: 'UUID of the event to generate an article for',
+                  },
                   language: { $ref: '#/components/schemas/ArticleLanguage' },
                   tone: { $ref: '#/components/schemas/ArticleTone' },
                 },
@@ -587,11 +635,15 @@ export const openApiSpec = {
           '401': unauthorizedResponse,
           '404': {
             description: 'Event not found',
-            content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } },
+            content: {
+              'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } },
+            },
           },
           '409': {
             description: 'An article already exists for this event',
-            content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } },
+            content: {
+              'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } },
+            },
           },
         },
       },
@@ -673,5 +725,4 @@ export const openApiSpec = {
       },
     },
   },
-};
-
+}

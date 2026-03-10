@@ -1,14 +1,6 @@
-import {
-  pgTable,
-  uuid,
-  text,
-  integer,
-  timestamp,
-  jsonb,
-  index,
-} from 'drizzle-orm/pg-core';
-import { sports } from './sports.js';
-import { articles } from './articles.js';
+import { pgTable, uuid, text, integer, timestamp, jsonb, index } from 'drizzle-orm/pg-core'
+import { sports } from './sports.js'
+import { articles } from './articles.js'
 
 export const newsTopics = pgTable(
   'news_topics',
@@ -35,8 +27,7 @@ export const newsTopics = pgTable(
     index('news_topics_first_seen_at_idx').on(table.first_seen_at),
     index('news_topics_article_id_idx').on(table.article_id),
   ],
-);
+)
 
-export type NewsTopic = typeof newsTopics.$inferSelect;
-export type NewNewsTopic = typeof newsTopics.$inferInsert;
-
+export type NewsTopic = typeof newsTopics.$inferSelect
+export type NewNewsTopic = typeof newsTopics.$inferInsert
