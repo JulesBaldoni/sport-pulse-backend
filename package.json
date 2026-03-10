@@ -42,8 +42,8 @@
     "test:watch": "vitest",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:migrate:run": "tsx --env-file=.env src/db/migrate.ts",
-    "db:seed": "tsx --env-file=.env src/db/seed.ts",
+    "db:migrate:run": "tsx src/db/migrate.ts",
+    "db:seed": "tsx src/db/seed.ts",
     "prepare": "husky"
   },
   "lint-staged": {
