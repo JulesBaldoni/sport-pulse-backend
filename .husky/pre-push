@@ -1,5 +1,22 @@
 #!/bin/sh
-echo "Running pre-push checks..."
-pnpm typecheck && pnpm test:unit
-echo "Pre-push checks passed."
+# ─── Pre-push hook ────────────────────────────────────────────────────────────
+# Workflow:
+#   main    → production  — never push directly, open a PR from develop
+#   develop → validation  — never push directly, open a PR from feature/*
+#   feature/* → push freely, then open a PR to develop
+# ──────────────────────────────────────────────────────────────────────────────
 
+current_branch=$(git symbolic-ref HEAD | sed 's|refs/heads/||')
+
+if [ "$current_branch" = "main" ] || [ "$current_branch" = "develop" ]; then
+  echo "Direct push to '$current_branch' is not allowed."
+  echo "   → Use a feature branch and open a Pull Request."
+  echo "     feature/{name}  →  PR to develop"
+  echo "     develop         →  PR to main  (release)"
+  exit 1
+fi
+
+# On feature branches: run typecheck + unit tests before push
+echo "🔍 Running pre-push checks on branch '$current_branch'..."
+pnpm typecheck && pnpm test:unit
+echo "✅ Pre-push checks passed."
